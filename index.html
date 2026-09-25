@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Compound Interest</title>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink: #111111;
+    --paper: #fbfbfa;
+    --surface: #ffffff;
+    --accent: #bddbcf;
+    --muted: #787774;
+    --rule: #eaeaea;
+    --green: #346538;
+    --pastel-blue: #e1f3fe;
+    --pastel-green: #edf3ec;
+    --font-sans: "SF Pro Display", "Geist Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    --font-serif: "Newsreader", "Instrument Serif", "Times New Roman", serif;
+    --font-mono: "SF Mono", "JetBrains Mono", "Menlo", monospace;
+  }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    line-height: 1.6;
+    min-height: 100vh;
+    padding: 0;
+    overflow-x: hidden;
+    background-image: radial-gradient(circle at 20% 8%, rgba(0,0,0,0.03), transparent 32%);
+  }
+
+  .masthead {
+    border-bottom: 1px solid var(--rule);
+    background: var(--surface);
+    padding: 40px 48px 28px;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 28px;
+  }
+
+  .masthead-title {
+    font-family: var(--font-serif);
+    font-size: clamp(32px, 5vw, 56px);
+    font-weight: 600;
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+  }
+
+  .masthead-title em {
+    color: var(--accent);
+    font-style: normal;
+  }
+
+  .masthead-tag {
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-align: right;
+    line-height: 1.6;
+  }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 340px 1fr;
+    min-height: calc(100vh - 126px);
+  }
+
+  .sidebar {
+    border-right: 1px solid var(--rule);
+    background: var(--surface);
+    padding: 36px 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+  }
+
+  .field-label {
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+    display: block;
+  }
+
+  .field-value {
+    font-size: 28px;
+    font-family: var(--font-serif);
+    font-weight: 600;
+    line-height: 1;
+    margin-bottom: 10px;
+  }
+
+  .currency-select {
+    width: 100%;
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    background: var(--surface);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: 12px;
+    letter-spacing: 0.03em;
+    padding: 10px 12px;
+    margin-top: 4px;
+  }
+
+  input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 2px;
+    background: var(--rule);
+    outline: none;
+    cursor: pointer;
+    position: relative;
+  }
+
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    border: 1px solid var(--rule);
+    background: var(--surface);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: transform 0.15s;
+  }
+
+  input[type="range"]::-webkit-slider-thumb:hover {
+    transform: scale(1.4);
+    border-color: var(--accent);
+  }
+
+  .divider {
+    border: none;
+    border-top: 1px solid var(--rule);
+  }
+
+  .freq-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+
+  .freq-btn {
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    background: var(--surface);
+    font-family: var(--font-sans);
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    padding: 8px 6px;
+    cursor: pointer;
+    color: var(--muted);
+    transition: all 0.15s;
+    text-align: center;
+  }
+
+  .freq-btn:hover {
+    border-color: var(--ink);
+    color: var(--ink);
+  }
+
+  .freq-btn.active {
+    background: var(--ink);
+    color: var(--paper);
+    border-color: var(--ink);
+  }
+
+  .main {
+    padding: 44px 48px;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  .numbers-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    border: 1px solid var(--rule);
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--surface);
+  }
+
+  .number-block {
+    padding: 24px 20px;
+    border-right: 1px solid var(--rule);
+  }
+
+  .number-block:last-child { border-right: none; }
+
+  .number-block-label {
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 12px;
+    display: block;
+  }
+
+  .number-block-val {
+    font-family: var(--font-serif);
+    font-weight: 600;
+    font-size: clamp(28px, 3vw, 40px);
+    line-height: 1;
+  }
+  .number-block-val.accent { color: #9f2f2d; }
+  .number-block-val.green { color: var(--green); }
+
+  .number-block-sub {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 6px;
+  }
+
+  .chart-section {
+    flex: 1;
+  }
+
+  .chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 16px;
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 10px;
+  }
+
+  .chart-title {
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .legend {
+    display: flex;
+    gap: 16px;
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+  }
+
+  .legend span {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .legend-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+
+  .chart-wrap {
+    position: relative;
+    width: 100%;
+    height: 260px;
+  }
+
+  .rule71 {
+    border: 1px solid var(--rule);
+    border-radius: 12px;
+    background: var(--surface);
+    padding: 16px 20px;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .rule71-label {
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .rule71-value {
+    font-family: var(--font-serif);
+    font-weight: 600;
+    font-size: 22px;
+    color: var(--ink);
+  }
+
+  .rule71-value em {
+    font-style: italic;
+    color: var(--accent);
+  }
+
+  .multiplier-strip {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    border: 1px solid var(--ink);
+    overflow: hidden;
+  }
+
+  .multiplier-label {
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #1f6c9f;
+    background: var(--pastel-blue);
+    border-right: 1px solid var(--rule);
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 160px;
+  }
+
+  .multiplier-bars {
+    display: flex;
+    flex: 1;
+    align-items: flex-end;
+    gap: 6px;
+    padding: 14px 16px;
+    min-height: 90px;
+  }
+
+  .m-bar-wrap {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .m-bar {
+    width: 100%;
+    background: #d7ebe5;
+    border: 1px solid #bddbcf;
+    transition: height 0.4s cubic-bezier(0.4,0,0.2,1);
+    min-height: 2px;
+    position: relative;
+  }
+
+  .m-bar-val {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--ink);
+  }
+
+  .m-bar-yr {
+    font-size: 9px;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(12px);
+    transition: transform 600ms cubic-bezier(0.16, 1, 0.3, 1), opacity 600ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  @media (max-width: 980px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { border-right: none; border-bottom: 1px solid var(--rule); }
+    .main { padding: 28px 24px; }
+    .masthead { padding: 28px 24px 20px; }
+    .numbers-row { grid-template-columns: 1fr; }
+    .number-block { border-right: none; border-bottom: 1px solid var(--rule); }
+    .number-block:last-child { border-bottom: none; }
+    .multiplier-strip { flex-direction: column; }
+    .multiplier-label { border-right: none; border-bottom: 1px solid var(--rule); min-width: 0; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .reveal, .reveal.visible { transition: none; opacity: 1; transform: none; }
+  }
+</style>
+</head>
+<body>
+
+<header class="masthead reveal">
+  <div class="masthead-title">The <em>Compound</em><br>Interest Register</div>
+  <div class="masthead-tag">
+    Money · Growth · Time<br>
+    A Financial Instrument
+  </div>
+</header>
+
+<div class="layout">
+  <aside class="sidebar reveal">
+
+    <div>
+      <label class="field-label">Currency</label>
+      <select id="currency" class="currency-select">
+        <option value="USD" selected>USD - US Dollar</option>
+      </select>
+    </div>
+
+    <hr class="divider">
+
+    <div>
+      <label class="field-label" id="principal-label">Principal (USD)</label>
+      <div class="field-value" id="p-val">$5,000</div>
+      <input type="range" id="principal" min="500" max="100000" step="500" value="5000">
+    </div>
+
+    <hr class="divider">
+
+    <div>
+      <label class="field-label">Annual Rate</label>
+      <div class="field-value" id="r-val">7%</div>
+      <input type="range" id="rate" min="1" max="20" step="0.5" value="7">
+    </div>
+
+    <hr class="divider">
+
+    <div>
+      <label class="field-label">Duration</label>
+      <div class="field-value" id="y-val">20 years</div>
+      <input type="range" id="years" min="1" max="50" step="1" value="20">
+    </div>
+
+    <hr class="divider">
+
+    <div>
+      <label class="field-label">Compounding frequency</label>
+      <div class="freq-grid" id="freq-grid">
+        <button class="freq-btn" data-n="1">Annual</button>
+        <button class="freq-btn" data-n="4">Quarterly</button>
+        <button class="freq-btn active" data-n="12">Monthly</button>
+        <button class="freq-btn" data-n="365">Daily</button>
+      </div>
+    </div>
+
+  </aside>
+
+  <main class="main reveal">
+
+    <div class="numbers-row">
+      <div class="number-block">
+        <span class="number-block-label">Invested</span>
+        <div class="number-block-val" id="m-principal">$5,000</div>
+        <div class="number-block-sub">your contribution</div>
+      </div>
+      <div class="number-block">
+        <span class="number-block-label">Interest earned</span>
+        <div class="number-block-val green" id="m-interest">—</div>
+        <div class="number-block-sub" id="m-pct">—% of total</div>
+      </div>
+      <div class="number-block">
+        <span class="number-block-label">Final balance</span>
+        <div class="number-block-val accent" id="m-total">—</div>
+        <div class="number-block-sub" id="m-mult">—× multiplier</div>
+      </div>
+    </div>
+
+    <div class="chart-section">
+      <div class="chart-header">
+        <span class="chart-title">Balance over time</span>
+        <div class="legend">
+          <span><span class="legend-dot" style="background:#1f6c9f;"></span>Total balance</span>
+          <span><span class="legend-dot" style="background:#d7ebe5;"></span>Principal</span>
+        </div>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="chart"></canvas>
+      </div>
+    </div>
+
+    <div class="multiplier-strip">
+      <div class="multiplier-label">× growth at 10-yr intervals</div>
+      <div class="multiplier-bars" id="mult-bars"></div>
+    </div>
+
+    <div class="rule71">
+      <span class="rule71-label">Rule of 72 — doubling time</span>
+      <span class="rule71-value">Money doubles in <em id="double-yr">—</em> years</span>
+    </div>
+
+  </main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+  let n = 12;
+  let currentCurrency = 'USD';
+  let currentLocale = 'en-US';
+
+  const currencyLocaleMap = {
+    USD: 'en-US', EUR: 'de-DE', GBP: 'en-GB', JPY: 'ja-JP', CNY: 'zh-CN',
+    INR: 'en-IN', PKR: 'ur-PK', AED: 'ar-AE', AUD: 'en-AU', CAD: 'en-CA',
+    CHF: 'de-CH', SEK: 'sv-SE', NOK: 'nb-NO', DKK: 'da-DK', NZD: 'en-NZ',
+    HKD: 'zh-HK', SGD: 'en-SG', KRW: 'ko-KR', THB: 'th-TH', TRY: 'tr-TR',
+    BRL: 'pt-BR', MXN: 'es-MX', ZAR: 'en-ZA', RUB: 'ru-RU', PLN: 'pl-PL',
+    CZK: 'cs-CZ', HUF: 'hu-HU', RON: 'ro-RO', ILS: 'he-IL', SAR: 'ar-SA',
+    QAR: 'ar-QA', KWD: 'ar-KW', BHD: 'ar-BH', OMR: 'ar-OM', EGP: 'ar-EG',
+    MAD: 'ar-MA', NGN: 'en-NG', KES: 'en-KE', GHS: 'en-GH'
+  };
+
+  function getLocaleForCurrency(currency) {
+    return currencyLocaleMap[currency] || navigator.language || 'en-US';
+  }
+
+  function populateCurrencyOptions() {
+    const currencyEl = document.getElementById('currency');
+    if (!currencyEl) return;
+
+    const displayNames = typeof Intl.DisplayNames === 'function'
+      ? new Intl.DisplayNames(['en'], { type: 'currency' })
+      : null;
+
+    let currencies = ['USD'];
+    if (typeof Intl.supportedValuesOf === 'function') {
+      try {
+        currencies = Intl.supportedValuesOf('currency');
+      } catch (e) {
+        currencies = ['USD', 'EUR', 'GBP', 'JPY', 'CNY', 'INR', 'PKR', 'AED'];
+      }
+    } else {
+      currencies = ['USD', 'EUR', 'GBP', 'JPY', 'CNY', 'INR', 'PKR', 'AED'];
+    }
+
+    currencyEl.innerHTML = '';
+    currencies.forEach(code => {
+      const option = document.createElement('option');
+      option.value = code;
+      const currencyName = displayNames ? displayNames.of(code) : code;
+      option.textContent = currencyName && currencyName !== code ? `${code} - ${currencyName}` : code;
+      if (code === 'USD') option.selected = true;
+      currencyEl.appendChild(option);
+    });
+  }
+
+  function fmt(v) {
+    return new Intl.NumberFormat(currentLocale, {
+      style: 'currency',
+      currency: currentCurrency,
+      maximumFractionDigits: 0
+    }).format(Math.round(v));
+  }
+
+  function fmtShort(v) {
+    return new Intl.NumberFormat(currentLocale, {
+      style: 'currency',
+      currency: currentCurrency,
+      notation: 'compact',
+      maximumFractionDigits: 1
+    }).format(v);
+  }
+
+  function calc(P, r, Y, n) {
+    return P * Math.pow(1 + r/n, n*Y);
+  }
+
+  const ctx = document.getElementById('chart').getContext('2d');
+  const chart = new Chart(ctx, {
+    type: 'line',
+    data: { labels: [], datasets: [
+      { label: 'Total', data: [], borderColor: '#1f6c9f', backgroundColor: 'rgba(225,243,254,0.55)', fill: true, tension: 0.35, pointRadius: 0, borderWidth: 2 },
+      { label: 'Principal', data: [], borderColor: '#bddbcf', backgroundColor: 'rgba(237,243,236,0.45)', fill: true, tension: 0, pointRadius: 0, borderWidth: 1, borderDash: [5,4] }
+    ]},
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: {
+        backgroundColor: '#111111',
+        titleColor: '#787774',
+        bodyColor: '#fbfbfa',
+        titleFont: { family: 'SF Mono', size: 10 },
+        bodyFont: { family: 'Newsreader', size: 18 },
+        padding: 12,
+        callbacks: { label: c => ' ' + fmt(c.raw) }
+      }},
+      scales: {
+        x: { ticks: { maxTicksLimit: 8, color: '#787774', font: { family: 'SF Mono', size: 10 } }, grid: { color: 'rgba(0,0,0,0.06)' }, border: { color: '#eaeaea' } },
+        y: { ticks: { callback: v => fmtShort(v), color: '#787774', font: { family: 'SF Mono', size: 10 } }, grid: { color: 'rgba(0,0,0,0.06)' }, border: { color: '#eaeaea' } }
+      }
+    }
+  });
+
+  function setupReveals() {
+    const revealEls = document.querySelectorAll('.reveal, .numbers-row, .chart-section, .multiplier-strip, .rule71');
+    if (!('IntersectionObserver' in window)) {
+      revealEls.forEach(el => el.classList.add('visible'));
+      return;
+    }
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15 });
+    revealEls.forEach((el, idx) => {
+      el.classList.add('reveal');
+      el.style.transitionDelay = `${idx * 80}ms`;
+      observer.observe(el);
+    });
+  }
+
+  function update() {
+    const P = +document.getElementById('principal').value;
+    const r = +document.getElementById('rate').value / 100;
+    const Y = +document.getElementById('years').value;
+    const currency = document.getElementById('currency').value;
+    currentCurrency = currency;
+    currentLocale = getLocaleForCurrency(currency);
+
+    document.getElementById('principal-label').textContent = 'Principal (' + currency + ')';
+    document.getElementById('p-val').textContent = fmt(P);
+    document.getElementById('r-val').textContent = (+document.getElementById('rate').value).toFixed(1) + '%';
+    document.getElementById('y-val').textContent = Y + ' year' + (Y !== 1 ? 's' : '');
+
+    const labels = [], totals = [], principals = [];
+    for (let y = 0; y <= Y; y++) {
+      labels.push(y === 0 ? 'Now' : 'Yr ' + y);
+      totals.push(Math.round(calc(P, r, y, n)));
+      principals.push(P);
+    }
+
+    const final = totals[totals.length - 1];
+    const interest = final - P;
+    const pct = Math.round(interest / final * 100);
+    const mult = (final / P).toFixed(1);
+
+    document.getElementById('m-principal').textContent = fmt(P);
+    document.getElementById('m-interest').textContent = fmt(interest);
+    document.getElementById('m-total').textContent = fmt(final);
+    document.getElementById('m-pct').textContent = pct + '% of total';
+    document.getElementById('m-mult').textContent = mult + '× multiplier';
+    document.getElementById('double-yr').textContent = (72 / (+document.getElementById('rate').value)).toFixed(1);
+
+    chart.data.labels = labels;
+    chart.data.datasets[0].data = totals;
+    chart.data.datasets[1].data = principals;
+    chart.update('none');
+
+    const barsEl = document.getElementById('mult-bars');
+    barsEl.innerHTML = '';
+    const checkpoints = [10, 20, 30, 40, 50].filter(cp => cp <= Math.max(Y, 10));
+    const maxVal = Math.max(...checkpoints.map(cp => calc(P, r, cp, n)));
+    const MAX_H = 60;
+    checkpoints.forEach(cp => {
+      const val = calc(P, r, cp, n);
+      const h = Math.max(4, Math.round((val / maxVal) * MAX_H));
+      const w = document.createElement('div');
+      w.className = 'm-bar-wrap';
+      w.innerHTML = `
+        <div class="m-bar-val">${(val/P).toFixed(1)}×</div>
+        <div class="m-bar" style="height:${h}px;"></div>
+        <div class="m-bar-yr">yr ${cp}</div>`;
+      barsEl.appendChild(w);
+    });
+  }
+
+  ['principal','rate','years', 'currency'].forEach(id => {
+    document.getElementById(id).addEventListener('input', update);
+  });
+
+  document.getElementById('freq-grid').addEventListener('click', e => {
+    const btn = e.target.closest('.freq-btn');
+    if (!btn) return;
+    document.querySelectorAll('.freq-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    n = +btn.dataset.n;
+    update();
+  });
+
+  populateCurrencyOptions();
+  setupReveals();
+  update();
+</script>
+</body>
+</html>
