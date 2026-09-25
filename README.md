@@ -4,7 +4,7 @@
 
 ### See what time does to money.
 
-An interactive compound interest calculator with a live growth chart, 150+ currencies, and the Rule of 72, all in a single HTML file.
+An interactive compound interest calculator with a live growth chart, every currency your browser supports, and the Rule of 72, all in a single HTML file.
 
 ![HTML5](https://img.shields.io/badge/HTML5-E34F26?logo=html5&logoColor=white)
 ![CSS3](https://img.shields.io/badge/CSS3-1572B6?logo=css3&logoColor=white)
