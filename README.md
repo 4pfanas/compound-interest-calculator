@@ -13,6 +13,9 @@ An interactive compound interest calculator with a live growth chart, every curr
 
 </div>
 
+**Live demo:** https://4pfanas.github.io/compound-interest-calculator/
+
+
 ---
 
 ## Table of contents
